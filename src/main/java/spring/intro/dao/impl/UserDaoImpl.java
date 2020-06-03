@@ -43,7 +43,7 @@ public class UserDaoImpl implements UserDao {
             TypedQuery<User> query = session.createQuery("from User", User.class);
             return query.getResultList();
         } catch (Exception e) {
-            throw new DataProcessingException("Error retrieving all movies", e);
+            throw new DataProcessingException("Error retrieving all users", e);
         }
     }
 }
