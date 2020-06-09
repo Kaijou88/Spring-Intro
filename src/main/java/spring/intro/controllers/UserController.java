@@ -1,7 +1,7 @@
 package spring.intro.controllers;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -18,7 +18,6 @@ public class UserController {
     private AnnotationConfigApplicationContext context =
             new AnnotationConfigApplicationContext(AppConfig.class);
     private UserService userService = context.getBean(UserService.class);
-    private List<UserResponseDto> usersDto = new ArrayList<>();
 
     @GetMapping("/inject")
     public void injectIntoDB() {
@@ -30,23 +29,25 @@ public class UserController {
 
     @GetMapping("/{userId}")
     public UserResponseDto get(@PathVariable Long userId) {
-        return usersDto.stream()
+        return userService.listUsers().stream()
                 .filter(u -> u.getId().equals(userId))
+                .map(this::getUserDto)
                 .findFirst()
                 .get();
     }
 
     @GetMapping("/")
     public List<UserResponseDto> getAll() {
-        List<User> users;
-        users = userService.listUsers();
-        for (User user : users) {
-            UserResponseDto userDto = new UserResponseDto();
-            userDto.setId(user.getId());
-            userDto.setLogin(user.getLogin());
-            userDto.setEmail(user.getEmail());
-            usersDto.add(userDto);
-        }
-        return usersDto;
+        return userService.listUsers().stream()
+                .map(this::getUserDto)
+                .collect(Collectors.toList());
+    }
+
+    private UserResponseDto getUserDto(User user) {
+        UserResponseDto userDto = new UserResponseDto();
+        userDto.setId(user.getId());
+        userDto.setLogin(user.getLogin());
+        userDto.setEmail(user.getEmail());
+        return userDto;
     }
 }
